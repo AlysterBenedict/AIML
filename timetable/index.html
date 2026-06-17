@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>52-Day AIML Master Track Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --bg-gradient: radial-gradient(circle at 50% 50%, #0d0d0d 0%, #000000 100%);
+            --card-bg: rgba(10, 10, 10, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-color: #ffd700;
+            --accent-gradient: linear-gradient(135deg, #ffec99 0%, #ffd700 50%, #cca010 100%);
+            --success-color: #10b981;
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --text-main: #f5f5f7;
+            --text-muted: #8e8e93;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.95);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #222222;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #ffffff 30%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Sync Status Indicator */
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .sync-indicator.online {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+        .sync-indicator.offline {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.online {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        .status-dot.offline {
+            background-color: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Controls Console */
+        .dashboard-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (min-width: 768px) {
+            .dashboard-controls {
+                grid-template-columns: 280px 1fr;
+            }
+        }
+
+        .control-panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="date"] {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+        input[type="date"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 12px 16px 12px 42px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+        .search-input:focus + .search-icon {
+            color: var(--accent-color);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+            margin-top: 15px;
+        }
+        .filter-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: 'Outfit', sans-serif;
+        }
+        .tab-btn:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: #000000;
+            border-color: transparent;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Stats Blocks */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.05);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .stat-card-icon {
+            color: var(--accent-color);
+            background: rgba(255, 215, 0, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-lbl {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Progress Card */
+        .progress-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 35px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .progress-percentage {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .progress-bar-bg {
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 12px;
+            height: 16px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-fill {
+            background: var(--success-gradient);
+            height: 100%;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Curriculum Lists */
+        .phase-section {
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .phase-header {
+            background: linear-gradient(90deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%);
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--card-border);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1.1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .day-row {
+            padding: 20px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .day-row:last-child {
+            border-bottom: none;
+        }
+
+        .day-row:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding-left: 28px;
+        }
+
+        /* Custom Checkbox */
+        .checkbox-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-top: 4px;
+        }
+        .checkbox-wrapper input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .custom-checkbox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 22px;
+            width: 22px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checkbox-wrapper:hover .custom-checkbox {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+        }
+        .custom-checkbox::after {
+            content: "";
+            position: absolute;
+            display: none;
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translate(-0.5px, -0.5px);
+        }
+        .checkbox-wrapper input:checked ~ .custom-checkbox {
+            background: var(--success-gradient);
+            border-color: transparent;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+        .checkbox-wrapper input:checked ~ .custom-checkbox::after {
+            display: block;
+        }
+
+        .day-tag {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            min-width: 65px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.05);
+        }
+
+        .date-tag {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            min-width: 100px;
+            padding-top: 6px;
+            font-weight: 500;
+        }
+
+        .concept-text {
+            flex-grow: 1;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .concept-title {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .item-list {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        .item-list li {
+            margin-bottom: 6px;
+        }
+
+        .graded-item { 
+            color: #f87171; 
+            font-weight: 500; 
+            background: rgba(248, 113, 113, 0.08); 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            border: 1px solid rgba(248, 113, 113, 0.15); 
+            display: inline-block; 
+            margin: 2px 0;
+            font-size: 0.85rem;
+        }
+        .lab-item { 
+            color: #60a5fa; 
+            font-weight: 500; 
+            background: rgba(96, 165, 250, 0.08); 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            border: 1px solid rgba(96, 165, 250, 0.15); 
+            display: inline-block; 
+            margin: 2px 0;
+            font-size: 0.85rem;
+        }
+        .opt-item { 
+            color: var(--text-muted); 
+            font-style: italic; 
+            background: rgba(255, 255, 255, 0.04); 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+            display: inline-block; 
+            margin: 2px 0;
+            font-size: 0.85rem;
+        }
+
+        .completed-row {
+            background-color: rgba(16, 185, 129, 0.02) !important;
+        }
+        .completed-row .concept-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        .completed-row .concept-title {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+        .completed-row .item-list {
+            color: #6b7280 !important;
+            text-decoration: line-through;
+        }
+        .completed-row .graded-item, 
+        .completed-row .lab-item,
+        .completed-row .opt-item {
+            color: var(--text-muted) !important;
+            text-decoration: line-through;
+            background: transparent !important;
+            border-color: transparent !important;
+            padding: 0 !important;
+        }
+        .completed-row .day-tag {
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+            box-shadow: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+        }
+        .no-results svg {
+            opacity: 0.4;
+            color: var(--accent-color);
+        }
+
+        /* Reset & Config Actions */
+        .actions-panel {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn:hover {
+            background: rgba(248, 113, 113, 0.1);
+            border-color: rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>AIML Study Planner & EOD Progress Dashboard</h1>
+        <p class="subtitle">52 Days Tracked Execution Timeline (6 Hours/Day)</p>
+        <div id="syncIndicator" class="sync-indicator offline">
+            <span class="status-dot offline"></span>Local Storage Active (Offline)
+        </div>
+    </header>
+
+    <div class="actions-panel">
+        <button class="btn" onclick="resetProgress()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+            </svg>
+            Reset Progress
+        </button>
+    </div>
+
+    <div class="dashboard-controls">
+        <div class="control-panel-card">
+            <div class="control-group">
+                <label>Target Start Date</label>
+                <input type="date" id="startDatePicker" onchange="handleDateChange()">
+            </div>
+            <div class="control-group">
+                <label>Estimated Finish</label>
+                <div id="finishDateDisplay" style="color: white; font-weight: bold; font-size: 1.05rem; margin-top: 4px;">-</div>
+            </div>
+        </div>
+
+        <div class="control-panel-card" style="justify-content: center;">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search topics, quiz names, lab assignments..." oninput="handleSearch(this.value)">
+                <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z"/>
+                </svg>
+            </div>
+            
+            <div class="filter-tabs" id="filterTabs">
+                <button class="tab-btn active" onclick="switchTab('all', this)">All Courses</button>
+                <button class="tab-btn" onclick="switchTab('ml', this)">Machine Learning</button>
+                <button class="tab-btn" onclick="switchTab('dl', this)">Deep Learning</button>
+                <button class="tab-btn" onclick="switchTab('genai', this)">Generative AI</button>
+                <button class="tab-btn" onclick="switchTab('mlops', this)">MLOps Production</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-lbl">Days Completed</div>
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+            </div>
+            <div class="stat-val" id="totalDaysDone">0 / 52</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-lbl">Hours Logged</div>
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+            </div>
+            <div class="stat-val" id="estimatedHours">0 / 312</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-lbl">Active Target Module</div>
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+            </div>
+            <div class="stat-val" id="currentCourse" style="font-size: 1.15rem; font-weight: 600; line-height: 1.3;">Course 1</div>
+        </div>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress-header">
+            <span class="progress-title">Overall Curriculum Completion Progress</span>
+            <span id="progressPercent" class="progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div id="scheduleContainer"></div>
+</div>
+
+<script>
+    const curriculum = [
+        {
+            category: "ml",
+            phase: "1. Supervised Machine Learning: Regression and Classification",
+            days: [
+                { d: 1, c: "Week 1: Overview of ML & Supervised vs Unsupervised Learning Platforms", items: ["Topic: Overview of Machine Learning", "Topic: Supervised vs. Unsupervised Machine Learning", "<span class='graded-item'>Quiz: Supervised vs unsupervised learning</span>"] },
+                { d: 2, c: "Week 1: Simple Linear Regression & Cost Function Visual Intuition", items: ["Topic: Regression Model", "<span class='graded-item'>Quiz: Regression Model</span>"] },
+                { d: 3, c: "Week 1: Optimization Engineering via Gradient Descent Architectures", items: ["Topic: Train the model with gradient descent", "<span class='graded-item'>Quiz: Train the model with gradient descent</span>"] },
+                { d: 4, c: "Week 2: Multiple Linear Regression Configurations & Vectorized Systems", items: ["Topic: Multiple linear regression", "<span class='graded-item'>Quiz: Multiple linear regression</span>"] },
+                { d: 5, c: "Week 2: Scaling Methods, Learning Rate Bounds & Scikit-Learn Introductions", items: ["Topic: Gradient descent in practice", "<span class='graded-item'>Quiz: Gradient descent in practice</span>", "<span class='graded-item'>Lab Assignment: Week 2 practice lab: Linear regression</span>"] },
+                { d: 6, c: "Week 3: Classification Boundaries & Logistic Regression System Routines", items: ["Topic: Classification with logistic regression", "<span class='graded-item'>Quiz: Practice quiz: Classification with logistic regression</span>"] },
+                { d: 7, c: "Week 3: Loss Formulations & Cost Calculations for Logistic Classifiers", items: ["Topic: Cost function for logistic regression", "<span class='graded-item'>Quiz: Cost function for logistic regression</span>"] },
+                { d: 8, c: "Week 3: Optimization Implementations for Classification Sets & Scikit Implementations", items: ["Topic: Gradient descent for logistic regression", "<span class='graded-item'>Quiz: Gradient descent for logistic regression</span>"] },
+                { d: 9, c: "Week 3: Regularization Penalties, Overfitting Control Loops & Course 1 Finalization", items: ["Topic: The problem of overfitting", "Reading: End of Access to Lab Notebooks", "<span class='graded-item'>Quiz: The problem of overfitting</span>", "<span class='graded-item'>Lab Assignment: Week 3 practice lab: logistic regression</span>", "<span class='opt-item'>Optional: Conversations with Andrew</span>", "Reading: Acknowledgments"] }
+            ]
+        },
+        {
+            category: "ml",
+            phase: "2. Advanced Learning Algorithms",
+            days: [
+                { d: 10, c: "Week 1: Brain Analogies, Image Tensors & Neural Network Structural Intuition", items: ["Topic: Neural networks intuition", "<span class='graded-item'>Quiz: Neural networks intuition</span>"] },
+                { d: 11, c: "Week 1: Forward Propagation Layer Pass Routines & Data Matrices in TensorFlow", items: ["Topic: Neural network model", "<span class='graded-item'>Quiz: Neural network model</span>", "Topic: TensorFlow implementation", "<span class='graded-item'>Quiz: TensorFlow implementation</span>"] },
+                { d: 12, c: "Week 1: Python NumPy Scratch Formulations, AGI Constraints & Matrix Form Multiplications", items: ["Topic: Neural network implementation in Python", "<span class='graded-item'>Quiz: Neural network implementation in Python</span>", "Topic: Speculations on artificial general intelligence (AGI)", "<span class='opt-item'>Optional: Vectorization</span>", "<span class='graded-item'>Lab Assignment: Practice Lab: Neural networks</span>"] },
+                { d: 13, c: "Week 2: Model Compilation Sequences & Structural Multi-Layer Network Training", items: ["Topic: Neural Network Training", "<span class='graded-item'>Quiz: Neural Network Training</span>"] },
+                { d: 14, c: "Week 2: Non-Linear Activation Layer Units (ReLU & Sigmoid Choices)", items: ["Topic: Activation Functions", "<span class='graded-item'>Quiz: Activation Functions</span>"] },
+                { d: 15, c: "Week 2: Multi-Class Target Maps & Softmax Vector Implementations", items: ["Topic: Multiclass Classification", "<span class='graded-item'>Quiz: Multiclass Classification</span>"] },
+                { d: 16, c: "Week 2: Advanced Optimization Variants (Adam Adaptive Tuning) & Computational Derivative Graphs", items: ["Topic: Additional Neural Network Concepts", "<span class='graded-item'>Quiz: Additional Neural Network Concepts</span>", "<span class='opt-item'>Optional: Back Propagation</span>", "<span class='graded-item'>Lab Assignment: Practice Lab: Neural network training</span>"] },
+                { d: 17, c: "Week 3: Validation Schemes, Test Set Distributions & Performance Baselines", items: ["Topic: Advice for applying machine learning", "<span class='graded-item'>Quiz: Advice for applying machine learning</span>"] },
+                { d: 18, c: "Week 3: High Bias vs High Variance Diagnostics & Custom Model Learning Curves", items: ["Topic: Bias and variance", "<span class='graded-item'>Quiz: Bias and variance</span>"] },
+                { d: 19, c: "Week 3: Iterative Project Lifecycles, Error Analysis Arrays & Transfer Learning Setups", items: ["Topic: Machine learning development process", "<span class='graded-item'>Quiz: Machine learning development process</span>", "<span class='opt-item'>Optional: Skewed datasets</span>", "<span class='graded-item'>Lab Assignment: Practice Lab: Advice for applying machine learning</span>"] },
+                { d: 20, c: "Week 4: Information Processing Layouts & Decision Tree Nodes Formulation", items: ["Topic: Decision trees", "<span class='graded-item'>Quiz: Decision trees</span>"] },
+                { d: 21, c: "Week 4: Entropy Tracking Calculations & Category One-Hot Encoding Systems", items: ["Topic: Decision tree learning", "<span class='graded-item'>Quiz: Decision tree learning</span>"] },
+                { d: 22, c: "Week 4: Random Forests Frameworks & Gradient Tree Boosting via XGBoost", items: ["Topic: Tree ensembles", "<span class='graded-item'>Quiz: Tree ensembles</span>", "Reading: End of Access to Lab Notebooks", "<span class='graded-item'>Lab Assignment: Practice Lab: Decision Trees</span>", "<span class='opt-item'>Optional: Conversations with Andrew</span>", "Reading: Acknowledgments"] }
+            ]
+        },
+        {
+            category: "ml",
+            phase: "3. Unsupervised Learning, Recommenders, Reinforcement Learning",
+            days: [
+                { d: 23, c: "Week 1: Unsupervised Ingestion & K-Means Centroid Allocation Loops", items: ["Reading: Welcome to the course!", "Topic: Clustering", "<span class='graded-item'>Quiz: Clustering</span>", "<span class='graded-item'>Lab Assignment: Practice Lab 1 (k-means)</span>"] },
+                { d: 24, c: "Week 1: Anomaly Capture Schemes & Normal Gaussian Probability Densities", items: ["Topic: Anomaly detection", "<span class='graded-item'>Quiz: Anomaly detection</span>", "<span class='graded-item'>Lab Assignment: Practice Lab 2 (Anomaly Detection)</span>"] },
+                { d: 25, c: "Week 2: Collaborative Filtering Filters & User Profile Matrix Factorizations", items: ["Topic: Collaborative filtering", "<span class='graded-item'>Quiz: Collaborative filtering</span>"] },
+                { d: 26, c: "Week 2: Mean Normalization Processing & Vector Similarity Metrics", items: ["Topic: Recommender systems implementation detail", "<span class='graded-item'>Lab Assignment: Practice lab 1 (Collaborative Filtering Recommender Systems)</span>", "<span class='graded-item'>Quiz: Recommender systems implementation</span>"] },
+                { d: 27, c: "Week 2: Deep Learning Content Filtering & Dimensionality Shrinkage via PCA", items: ["Topic: Content-based filtering", "<span class='graded-item'>Quiz: Content-based filtering</span>", "<span class='graded-item'>Lab Assignment: Practice lab 2 (Deep Learning for Content-Based Filtering)</span>", "Topic: Principal Component Analysis"] },
+                { d: 28, c: "Week 3: Reinforcement Learning Maps, Markov States & Policy Returns", items: ["Topic: Reinforcement learning introduction", "<span class='graded-item'>Quiz: Reinforcement learning introduction</span>"] },
+                { d: 29, c: "Week 3: State-Action Value Maps ($Q$-Learning) & Bellman Equation Calculations", items: ["Topic: State-action value function", "<span class='graded-item'>Quiz: State-action value function</span>"] },
+                { d: 30, c: "Week 3: Continuous Deep $Q$-Networks & Virtual Space Craft Control Systems", items: ["Topic: Continuous state spaces", "<span class='graded-item'>Quiz: Continuous state spaces</span>", "Reading: End of Access to Lab Notebooks", "<span class='graded-item'>Lab Assignment: Practice Lab: Reinforcement Learning</span>", "Video: Summary and thank you", "<span class='opt-item'>Optional: Conversations with Andrew</span>", "Reading: Acknowledgments"] }
+            ]
+        },
+        {
+            category: "dl",
+            phase: "4. Deep Learning Specialization — Neural Networks Foundation",
+            days: [
+                { d: 31, c: "C1/W1-W2: Multi-Layer Evolution & Logistic Processing as Simple Neural Units", items: ["Reading: Welcome to the Deep Learning Specialization", "Topic: Introduction to Deep Learning", "<span class='graded-item'>Quiz (C1W1)</span>", "Topic: Logistic Regression as a Neural Network", "Topic: Python and Vectorization", "<span class='graded-item'>Quiz (C1W2)</span>", "<span class='graded-item'>Programming Assignments (C1W2)</span>"] },
+                { d: 32, c: "C1/W3-W4: Shallow Layer Forward Passes & Multi-Layer Backpropagation Arrays", items: ["Topic: Shallow Neural Network", "<span class='graded-item'>Quiz (C1W3)</span>", "<span class='graded-item'>Programming Assignment (C1W3)</span>", "Topic: Deep Neural Network", "<span class='graded-item'>Quiz (C1W4)</span>", "Reading: End of access to Lab Notebooks", "<span class='graded-item'>Programming Assignments (C1W4)</span>", "Reading: References & Acknowledgments"] },
+                { d: 33, c: "C2/W1: Regularization Schemes (Dropout/L2) & Data Splitting Controls", items: ["Topic: Setting up your Machine Learning Application", "Topic: Regularizing your Neural Network", "Topic: Setting Up your Optimization Problem", "<span class='graded-item'>Quiz (C2W1)</span>", "<span class='graded-item'>Programming Assignments (C2W1)</span>"] },
+                { d: 34, c: "C2/W2: Advanced Momentum Solvers, RMSprop & Adam Gradient Step Paths", items: ["Topic: Optimization Algorithms", "<span class='graded-item'>Quiz (C2W2)</span>", "<span class='graded-item'>Programming Assignment (C2W2)</span>"] },
+                { d: 35, c: "C2/W3: Hyperparameter Sweeps, Batch Norm Rules & Multi-Class Softmax Networks", items: ["Topic: Hyperparameter Tuning", "Topic: Batch Normalization", "Topic: Multi-class Classification", "Topic: Introduction to Programming Frameworks", "<span class='graded-item'>Quiz (C2W3)</span>", "Reading: End of access to Lab Notebooks", "<span class='graded-item'>Programming Assignment (C2W3)</span>", "Reading: References & Acknowledgments"] }
+            ]
+        },
+        {
+            category: "dl",
+            phase: "5. Deep Learning Specialization — Strategy & CNNs",
+            days: [
+                { d: 36, c: "C3/W1-W2: Strategic Error Audit Targets & Development Set Shift Diagnostics", items: ["Topic: Introduction to ML Strategy", "Topic: Setting Up your Goal", "Topic: Comparing to Human-level Performance", "<span class='graded-item'>Quiz: Machine Learning Flight Simulator (C3W1)</span>", "Topic: Error Analysis", "Topic: Mismatched Training and Dev/Test Set", "Topic: Learning from Multiple Tasks", "Topic: End-to-end Deep Learning", "<span class='graded-item'>Quiz: Machine Learning Flight Simulator (C3W2)</span>", "Reading: Acknowledgments"] },
+                { d: 37, c: "C4/W1: Spatial Feature Mapping, Strided Convolution Tensors & Padding Boundaries", items: ["Topic: Convolutional Neural Networks", "<span class='graded-item'>Quiz (C4W1)</span>", "<span class='graded-item'>Programming Assignments (C4W1)</span>"] },
+                { d: 38, c: "C4/W2: Multi-Layer Residual Links (ResNets) & Deep Network Case Code Studies", items: ["Topic: Case Studies", "Topic: Practical Advice for Using ConvNets", "<span class='graded-item'>Quiz (C4W2)</span>", "<span class='graded-item'>Programming Assignments (C4W2)</span>"] },
+                { d: 39, c: "C4/W3: Bounding Regressions, Anchor Frames & Multi-Object YOLO Track Locators", items: ["Topic: Detection Algorithms", "<span class='graded-item'>Quiz (C4W3)</span>", "<span class='graded-item'>Programming Assignments (C4W3)</span>"] },
+                { d: 40, c: "C4/W4: Siamese Feature Mapping Architecture Verification & Neural Style Synthesis Loops", items: ["Topic: Face Recognition", "Topic: Neural Style Transfer", "<span class='graded-item'>Quiz (C4W4)</span>", "Reading: End of access to Lab Notebooks", "<span class='graded-item'>Programming Assignments (C4W4)</span>", "Reading: References & Acknowledgments"] }
+            ]
+        },
+        {
+            category: "dl",
+            phase: "6. Deep Learning Specialization — Sequence Models",
+            days: [
+                { d: 41, c: "Week 1: Recurrent Sequences, Hidden States Passes & LSTM Memory Gates", items: ["Topic: Regular Recurrent Neural Networks", "<span class='graded-item'>Quiz (C5W1)</span>", "<span class='graded-item'>Programming Assignments (C5W1)</span>"] },
+                { d: 42, c: "Week 2: Vector Space Token Embeddings (Word2Vec & GloVe Architectures)", items: ["Topic: Introduction to Word Embeddings", "Topic: Learning Word Embeddings: Word2vec & GloVe", "Topic: Applications Using Word Embeddings", "<span class='graded-item'>Quiz (C5W2)</span>", "<span class='graded-item'>Programming Assignments (C5W2)</span>"] },
+                { d: 43, c: "Week 3: Sequence Translation Paths & Encoder-Decoder Attention Vector Maps", items: ["Topic: Various Sequence To Sequence Architectures", "Topic: Speech Recognition - Audio Data", "<span class='graded-item'>Quiz (C5W3)</span>", "<span class='graded-item'>Programming Assignments (C5W3)</span>"] },
+                { d: 44, c: "Week 4: Multi-Head Self-Attention Matrices & Scaled Transformer Core Topologies", items: ["Topic: Transformers", "<span class='graded-item'>Quiz (C5W4)</span>", "Reading: End of access to Lab Notebooks", "<span class='graded-item'>Programming Assignment (C5W4)</span>", "<span class='lab-item'>Lab: Transformer Applications - Ungraded Labs</span>", "Video: Conclusion", "Reading: References & Acknowledgments"] }
+            ]
+        },
+        {
+            category: "genai",
+            phase: "7. Generative AI with Large Language Models (AWS + DeepLearning.AI)",
+            days: [
+                { d: 45, c: "Week 1: Foundations, Scaling Laws & Transformer Engine Operations", items: ["Video: Course Introduction & Introduction - Week 1 (11m)", "Video: Generative AI & LLMs (4m)", "Video: LLM use cases and tasks & Text generation (4m)", "Video: Transformers architecture & Generating text (12m)", "Readings: Contributor Acknowledgments, Forum Setup & Attention Paper (30m)", "Video: Prompting engineering & Generative configuration (12m)", "Video: Generative AI project lifecycle & Lab 1 walkthrough (17m)", "<span class='lab-item'>Code Lab 1: Summarize Dialogue (10m)</span>"] },
+                { d: 46, c: "Week 1: Model Pre-Training Challenges & Compute-Optimal Scaling Strategies", items: ["Video: Pre-training large language models (9m)", "Video: Computational challenges & Efficient multi-GPU compute (18m)", "Video: Scaling laws and compute-optimal models (8m)", "Video: Pre-training for domain adaptation (5m)", "Reading: Domain-specific training: BloombergGPT (10m)", "<span class='graded-item'>Graded Quiz: Week 1 quiz (1h)</span>", "Readings: Week 1 resources & Lecture Notes Week 1 (11m)"] },
+                { d: 47, c: "Week 2: Instruction Tuning & Parameter-Efficient Fine-Tuning (PEFT/LoRA)", items: ["Video: Introduction - Week 2 & Instruction fine-tuning (11m)", "Video: Fine-tuning on single task & Multi-task instruction (11m)", "Reading: Scaling instruct models (10m)", "Video: Model evaluation & Benchmarks (15m)", "Video: Parameter efficient fine-tuning (PEFT) (4m)", "Video: PEFT techniques 1: LoRA & PEFT techniques 2: Soft prompts (15m)", "Video: Lab 2 walkthrough (15m)", "<span class='lab-item'>Code Lab 2: Fine-tune a generative AI model for dialogue summarization (10m)</span>", "<span class='graded-item'>Graded Quiz: Week 2 quiz (1h)</span>", "Readings: Week 2 Resources & Lecture Notes Week 2 (11m)"] },
+                { d: 48, c: "Week 3: Reinforcement Learning from Human Feedback (RLHF) & Alignment Logs", items: ["Video: Introduction - Week 3 & Aligning models with human values (7m)", "Video: Reinforcement learning from human feedback (RLHF) (8m)", "Video: RLHF: Obtaining feedback & Reward model (8m)", "Video: RLHF: Fine-tuning with reinforcement learning (3m)", "Video: Optional video: Proximal policy optimization (13m)", "Video: RLHF: Reward hacking (6m)", "Reading: KL divergence (10m)", "Video: Scaling human feedback (5m)"] },
+                { d: 49, c: "Week 3: Code Lab 3 Integration, Deployment Optimization & Advanced LLM ReAct Agents", items: ["Video: Lab 3 walkthrough (18m)", "Reading: [IMPORTANT] Reminder about end of access to Lab Notebooks (2m)", "<span class='lab-item'>Code Lab 3: Fine-tune FLAN-T5 with RLHF to generate more-positive summaries (10m)</span>", "Video: Model optimizations for deployment (7m)", "Video: Generative AI Project Lifecycle Cheat Sheet (2m)", "Video: Using the LLM in applications & Interacting with external applications (13m)", "Video: Chain-of-thought reasoning & Program-aided language models (PAL) (12m)", "Video: ReAct: Combining reasoning and action & ReAct: Reasoning and action (9m)", "Reading: ReAct: Reasoning and action (10m)", "Video: LLM application architectures & Optional video: AWS Sagemaker JumpStart (10m)", "<span class='graded-item'>Graded Quiz: Week 3 Quiz (1h)</span>", "Readings: Week 3 resources, Responsible AI, Conclusion & Lecture Notes (22m)", "Reading: Acknowledgments (1m)"] }
+            ]
+        },
+        {
+            category: "mlops",
+            phase: "8. Machine Learning in Production (MLOps)",
+            days: [
+                { d: 50, c: "Week 1: System Scoping, Deployment Patterns & Operational KPIs", items: ["Topic: The Machine Learning Project Lifecycle", "Topic: Deployment", "<span class='opt-item'>Optional: Lecture Notes</span>", "<span class='lab-item'>Lab Assignment: Ungraded Lab</span>"] },
+                { d: 51, c: "Week 2: Diagnostic Error Sweeps, Data Iterations & Model Audits", items: ["Topic: Select and train a model", "Topic: Error analysis and performance auditing", "Topic: Data iteration", "<span class='graded-item'>Graded Assessment</span>", "<span class='opt-item'>Optional: Lecture Notes</span>", "<span class='lab-item'>Lab Assignment: Ungraded Lab</span>"] },
+                { d: 52, c: "Week 3: Data Schema Baselines, Quality Labeling Controls & Course Finalization", items: ["Topic: Define Data and Establish Baseline", "Topic: Label and Organize Data", "<span class='opt-item'>Optional: Scoping</span>", "<span class='opt-item'>Optional: Lecture Notes</span>", "<span class='lab-item'>Lab Assignment: Ungraded Lab</span>", "<span class='graded-item'>Final Capstone Project Execution</span>", "Resources: Course Resources & Acknowledgements"] }
+            ]
+        }
+    ];
+
+    let activeTab = 'all';
+    let searchQuery = '';
+    let isLocalServer = false;
+    const totalDaysCount = 52;
+
+    async function initSync() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            try {
+                const response = await fetch('/api/data');
+                if (response.ok) {
+                    const data = await response.json();
+                    isLocalServer = true;
+                    
+                    if (data.startDate) {
+                        localStorage.setItem('aiml_start_date', data.startDate);
+                    }
+                    
+                    if (data.days) {
+                        Object.keys(data.days).forEach(dayNum => {
+                            localStorage.setItem(`aiml_day_${dayNum}`, data.days[dayNum] ? 'true' : 'false');
+                        });
+                    }
+                    updateSyncIndicator(true);
+                }
+            } catch (e) {
+                console.warn("Local data server not available. Using browser cache.", e);
+                updateSyncIndicator(false);
+            }
+        } else {
+            updateSyncIndicator(false);
+        }
+
+        const savedDate = localStorage.getItem('aiml_start_date');
+        if (savedDate) {
+            document.getElementById('startDatePicker').value = savedDate;
+        } else {
+            document.getElementById('startDatePicker').valueAsDate = new Date();
+        }
+
+        renderSchedule();
+    }
+
+    function updateSyncIndicator(connected) {
+        const indicator = document.getElementById('syncIndicator');
+        if (connected) {
+            indicator.innerHTML = '<span class="status-dot online"></span>Synced with timetable/progress.json';
+            indicator.className = "sync-indicator online";
+        } else {
+            indicator.innerHTML = '<span class="status-dot offline"></span>Local Storage Active (Offline)';
+            indicator.className = "sync-indicator offline";
+        }
+    }
+
+    async function saveProgressData() {
+        const startDate = document.getElementById('startDatePicker').value;
+        localStorage.setItem('aiml_start_date', startDate);
+        
+        const days = {};
+        for (let i = 1; i <= totalDaysCount; i++) {
+            days[i] = localStorage.getItem(`aiml_day_${i}`) === 'true';
+        }
+        
+        const payload = {
+            startDate: startDate,
+            days: days
+        };
+        
+        calculateProgress();
+        
+        if (isLocalServer) {
+            try {
+                const response = await fetch('/api/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    updateSyncIndicator(true);
+                } else {
+                    console.error("Failed to save progress to server.");
+                }
+            } catch (e) {
+                console.error("Error connecting to server for saving.", e);
+                updateSyncIndicator(false);
+                isLocalServer = false;
+            }
+        }
+    }
+
+    function renderSchedule() {
+        const container = document.getElementById('scheduleContainer');
+        container.innerHTML = '';
+        
+        const query = searchQuery.toLowerCase().trim();
+        let renderedPhasesCount = 0;
+
+        curriculum.forEach(phaseObj => {
+            const matchesTab = (activeTab === 'all' || phaseObj.category === activeTab);
+            
+            const matchingDays = phaseObj.days.filter(day => {
+                const matchesSearch = !query || 
+                    day.c.toLowerCase().includes(query) || 
+                    (day.items && day.items.some(item => item.toLowerCase().includes(query))) ||
+                    `day ${day.d}`.includes(query);
+                return matchesSearch;
+            });
+            
+            if (matchesTab && matchingDays.length > 0) {
+                renderedPhasesCount++;
+                const phaseEl = document.createElement('div');
+                phaseEl.className = 'phase-section';
+                
+                let html = `<div class="phase-header">${phaseObj.phase}</div>`;
+                
+                matchingDays.forEach(day => {
+                    const isChecked = localStorage.getItem(`aiml_day_${day.d}`) === 'true' ? 'checked' : '';
+                    const completedClass = isChecked ? 'completed-row' : '';
+                    
+                    let itemListHtml = "";
+                    if (day.items && day.items.length > 0) {
+                        itemListHtml = `<ul class="item-list">`;
+                        day.items.forEach(item => {
+                            itemListHtml += `<li>${item}</li>`;
+                        });
+                        itemListHtml += `</ul>`;
+                    }
+                    
+                    html += `
+                        <div class="day-row ${completedClass}" id="row_day_${day.d}">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="day_${day.d}" onchange="toggleDay(${day.d})" ${isChecked} onclick="event.stopPropagation()">
+                                <label for="day_${day.d}" class="custom-checkbox" onclick="event.stopPropagation()"></label>
+                            </div>
+                            <div class="day-tag">Day ${day.d}</div>
+                            <div class="date-tag" id="date_day_${day.d}">-</div>
+                            <div class="concept-text">
+                                <span class="concept-title">EOD Target:</span> ${day.c}
+                                ${itemListHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                phaseEl.innerHTML = html;
+                container.appendChild(phaseEl);
+            }
+        });
+
+        if (renderedPhasesCount === 0) {
+            container.innerHTML = `
+                <div class="no-results">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z"/>
+                    </svg>
+                    <p>No days found matching your filters.</p>
+                </div>
+            `;
+        }
+        
+        updateDates();
+        calculateProgress();
+    }
+
+    function updateDates() {
+        const startVal = document.getElementById('startDatePicker').value;
+        if (!startVal) return;
+
+        let startDate = new Date(startVal);
+        
+        for (let i = 1; i <= totalDaysCount; i++) {
+            let targetDate = new Date(startDate);
+            targetDate.setDate(startDate.getDate() + (i - 1));
+            
+            const dateEl = document.getElementById(`date_day_${i}`);
+            if (dateEl) {
+                dateEl.innerText = targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            
+            if (i === totalDaysCount) {
+                document.getElementById('finishDateDisplay').innerText = targetDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+        }
+    }
+
+    function handleDateChange() {
+        updateDates();
+        saveProgressData();
+    }
+
+    function toggleDay(dayNum) {
+        const checkBox = document.getElementById(`day_${dayNum}`);
+        const row = document.getElementById(`row_day_${dayNum}`);
+        
+        if (checkBox.checked) {
+            row.classList.add('completed-row');
+            localStorage.setItem(`aiml_day_${dayNum}`, 'true');
+        } else {
+            row.classList.remove('completed-row');
+            localStorage.setItem(`aiml_day_${dayNum}`, 'false');
+        }
+        
+        saveProgressData();
+    }
+
+    function calculateProgress() {
+        let doneCount = 0;
+        
+        for (let i = 1; i <= totalDaysCount; i++) {
+            if (localStorage.getItem(`aiml_day_${i}`) === 'true') {
+                doneCount++;
+            }
+        }
+
+        document.getElementById('totalDaysDone').innerText = `${doneCount} / ${totalDaysCount}`;
+        document.getElementById('estimatedHours').innerText = `${doneCount * 6} / ${totalDaysCount * 6}`;
+        
+        const percentage = Math.round((doneCount / totalDaysCount) * 100);
+        document.getElementById('progressPercent').innerText = `${percentage}%`;
+        
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.width = `${percentage}%`;
+
+        let currentFocus = "Course 1: Supervised ML";
+        if (doneCount >= 9) currentFocus = "Course 2: Advanced Algorithms";
+        if (doneCount >= 22) currentFocus = "Course 3: Unsupervised Core";
+        if (doneCount >= 30) currentFocus = "DL Specialization Stack";
+        if (doneCount >= 44) currentFocus = "Generative AI (LLMs)";
+        if (doneCount >= 49) currentFocus = "MLOps Production Engineering";
+        if (doneCount === totalDaysCount) currentFocus = "Job Market Ready! 🎉";
+        document.getElementById('currentCourse').innerText = currentFocus;
+    }
+
+    function handleSearch(val) {
+        searchQuery = val;
+        renderSchedule();
+    }
+
+    function switchTab(category, btnEl) {
+        activeTab = category;
+        
+        const buttons = document.querySelectorAll('#filterTabs .tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        btnEl.classList.add('active');
+        
+        renderSchedule();
+    }
+
+    function resetProgress() {
+        if (confirm("Are you sure you want to clear all completion checkboxes? This cannot be undone.")) {
+            for (let i = 1; i <= totalDaysCount; i++) {
+                localStorage.setItem(`aiml_day_${i}`, 'false');
+            }
+            saveProgressData();
+            renderSchedule();
+        }
+    }
+
+    window.onload = initSync;
+</script>
+
+</body>
+</html>
